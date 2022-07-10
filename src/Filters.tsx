@@ -6,38 +6,56 @@ import React, { useState } from 'react';
 const TRIANGLE_DOWN = '▾';
 const TRIANGLE_RIGHT = '▸';
 
-function FilterListItem({ id, label, filterKey }) {
+type FilterListItemType = {
+  id: string;
+  label: string;
+  items?: Array<FilterListItemType>;
+};
+
+function FilterListItem({
+  item,
+  filterKey,
+}: {
+  item: FilterListItemType;
+  filterKey: string;
+}) {
   const [filters, setFilters] = useRecoilState(filtersState);
 
-  const handleChange = (id) => (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((filters) => ({
       ...filters,
       [filterKey]: {
         ...filters[filterKey],
-        [id]: event.target.checked,
+        [item.id]: event.target.checked,
       },
     }));
   };
 
   return (
-    <li key={id}>
+    <li>
       <input
         type="checkbox"
-        checked={filters[filterKey][id]}
-        onChange={handleChange(id)}
+        checked={filters[filterKey][item.id]}
+        onChange={handleChange}
       />{' '}
-      {label}
+      {item.label}
     </li>
   );
 }
 
-function FilterListGroup({ groupId, groupLabel, filterKey, items }) {
+function FilterListGroup({
+  group,
+  filterKey,
+}: {
+  group: FilterListItemType;
+  filterKey: string;
+}) {
   const [filters, setFilters] = useRecoilState(filtersState);
 
-  const groupChecked = items.every((item) => filters[filterKey][item.id]);
-  const groupHandleCheck = (event) => {
-    const changedFilters = {};
-    for (let item of items) {
+  const checked = group.items!.every((item) => filters[filterKey][item.id]);
+  const handleCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const changedFilters: { [key: string]: boolean } = {};
+    for (let item of group.items!) {
       changedFilters[item.id] = event.target.checked;
     }
     setFilters((filters) => ({
@@ -52,23 +70,13 @@ function FilterListGroup({ groupId, groupLabel, filterKey, items }) {
   return (
     <>
       <li className="group-option">
-        <input
-          type="checkbox"
-          checked={groupChecked}
-          onChange={groupHandleCheck}
-        />{' '}
-        {groupLabel}
+        <input type="checkbox" checked={checked} onChange={handleCheck} />{' '}
+        {group.label}
       </li>
       <ul>
-        {items.map((item) => {
-          const { id, label } = item;
+        {group.items!.map((item) => {
           return (
-            <FilterListItem
-              key={id}
-              id={id}
-              label={label}
-              filterKey={filterKey}
-            />
+            <FilterListItem key={item.id} item={item} filterKey={filterKey} />
           );
         })}
       </ul>
@@ -76,9 +84,17 @@ function FilterListGroup({ groupId, groupLabel, filterKey, items }) {
   );
 }
 
-function FilterList({ label, items, filterKey }) {
+function FilterList({
+  label,
+  items,
+  filterKey,
+}: {
+  label: string;
+  items: Array<FilterListItemType>;
+  filterKey: string;
+}) {
   const [expanded, setExpanded] = useState(false);
-  const handleClick = (event) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setExpanded(!expanded);
   };
 
@@ -95,23 +111,19 @@ function FilterList({ label, items, filterKey }) {
       {expanded && (
         <ul>
           {items.map((item) => {
-            const { id, label, nestedItems } = item;
-            if (nestedItems) {
+            if (item.items) {
               return (
                 <FilterListGroup
-                  key={id}
-                  groupId={id}
-                  groupLabel={label}
+                  key={item.id}
+                  group={item}
                   filterKey={filterKey}
-                  items={nestedItems}
                 />
               );
             } else {
               return (
                 <FilterListItem
-                  key={id}
-                  id={id}
-                  label={label}
+                  key={item.id}
+                  item={item}
                   filterKey={filterKey}
                 />
               );
@@ -125,28 +137,32 @@ function FilterList({ label, items, filterKey }) {
 
 export default function Filters() {
   const categories = useRecoilValue(categoriesQuery);
-  const categoryItems = categories.map((parentCategory) => {
-    const {
-      id,
-      attributes: { name },
-      childCategories,
-    } = parentCategory;
-    const nestedItems = childCategories.map((category) => ({
-      id: category.id,
-      label: category.attributes.name,
-    }));
-    return { id, label: name, nestedItems };
-  });
+  const categoryItems: Array<FilterListItemType> = categories.map(
+    (parentCategory) => {
+      const {
+        id,
+        attributes: { name },
+        childCategories,
+      } = parentCategory;
+      const items = childCategories.map((category) => ({
+        id: category.id,
+        label: category.attributes.name,
+      }));
+      return { id, label: name, items };
+    },
+  );
   categoryItems.push({
     id: UNCATEGORIZED_ID,
     label: 'Uncategorized',
   });
 
   const accounts = useRecoilValue(accountsQuery);
-  const coverAccountItems = accounts.map((account) => ({
-    id: account.id,
-    label: account.attributes.displayName,
-  }));
+  const coverAccountItems: Array<FilterListItemType> = accounts.map(
+    (account) => ({
+      id: account.id,
+      label: account.attributes.displayName,
+    }),
+  );
   coverAccountItems.push({
     id: NOT_COVERED_ID,
     label: 'Not Covered',

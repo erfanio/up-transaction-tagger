@@ -34,16 +34,18 @@ export const accountsQuery = selector<Array<any>>({
 
 export const accountNameQuery = selectorFamily<string | null, string>({
   key: 'accountName',
-  get: (accountId) => ({ get }) => {
-    if (accountId === null) return null;
-    const accounts = get(accountsQuery);
-    const match = accounts.find((account) => account.id === accountId);
-    if (match === undefined) return 'UNKNOWN';
-    return match.attributes.displayName;
-  },
+  get:
+    (accountId) =>
+    ({ get }) => {
+      if (accountId === null) return null;
+      const accounts = get(accountsQuery);
+      const match = accounts.find((account) => account.id === accountId);
+      if (match === undefined) return 'UNKNOWN';
+      return match.attributes.displayName;
+    },
 });
 
-const findCovers = (transactions) => {
+const findCovers = (transactions: Array<any>) => {
   const covers = new Map<number, Array<any>>();
   const newTransactions = [];
   for (let transaction of transactions) {
@@ -93,49 +95,43 @@ const findCovers = (transactions) => {
 
   return newTransactions;
 };
+
 type PaginatedTransactions = {
   list: Array<any>;
   nextUrl: string | null;
 };
-export const paginaedTransactionsState = atomFamily<
+export const paginatedTransactionsState = atomFamily<
   PaginatedTransactions,
   string
 >({
-  key: 'transactions',
-  default: selectorFamily({
-    key: 'transactions/default',
-    get: (accountId) => async ({ get }) => {
-      const resp = await fetch(
-        `https://api.up.com.au/api/v1/accounts/${accountId}/transactions?page[size]=100`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${get(apiKeyState)}`,
-          },
+  key: 'paginated-transactions',
+  default: async (accountId) => {
+    const apiKey = window.localStorage.getItem(LOCALSTORAGE_KEY);
+    const resp = await fetch(
+      `https://api.up.com.au/api/v1/accounts/${accountId}/transactions?page[size]=100`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
         },
-      );
+      },
+    );
 
-      const json = await resp.json();
-      const withCoverMetadata = findCovers(json.data);
-      return {
-        list: withCoverMetadata,
-        nextUrl: json.links.next,
-      };
-    },
-  }),
+    const json = await resp.json();
+    const withCoverMetadata = findCovers(json.data);
+    return {
+      list: withCoverMetadata,
+      nextUrl: json.links.next,
+    };
+  },
 });
 
-export const loadMoreTransactions = async ({
-  paginatedTransactions,
-  setPaginatedTransactions,
-  apiKey,
-}: {
-  paginatedTransactions: PaginatedTransactions;
-  setPaginatedTransactions: SetterOrUpdater<PaginatedTransactions>;
-  apiKey: string;
-}) => {
-  if (!paginatedTransactions.nextUrl) return;
+export const loadMoreTransactions = async (
+  paginatedTransactions: PaginatedTransactions,
+): Promise<PaginatedTransactions> => {
+  if (!paginatedTransactions.nextUrl) return paginatedTransactions;
 
+  const apiKey = window.localStorage.getItem(LOCALSTORAGE_KEY);
   const resp = await fetch(paginatedTransactions.nextUrl, {
     method: 'GET',
     headers: {
@@ -148,30 +144,63 @@ export const loadMoreTransactions = async ({
     ...paginatedTransactions.list,
     ...json.data,
   ]);
-  setPaginatedTransactions({
+  return {
     list: withCoverMetadata,
     nextUrl: json.links.next,
-  });
+  };
 };
 
-const makeCategoryTree = (categories) => {
-  const tree = {};
+export const refreshTransactions = async (
+  accountId: string,
+  pageSize: number,
+) => {
+  const apiKey = window.localStorage.getItem(LOCALSTORAGE_KEY);
+  const resp = await fetch(
+    `https://api.up.com.au/api/v1/accounts/${accountId}/transactions?page[size]=${pageSize}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    },
+  );
+  const json = await resp.json();
+  const withCoverMetadata = findCovers(json.data);
+  return {
+    list: withCoverMetadata,
+    nextUrl: json.links.next,
+  };
+};
+
+type ChildCategory = {
+  id: string;
+  relationships: any;
+  attributes: { name: string };
+};
+type Category = {
+  id: string;
+  relationships: any;
+  attributes: { name: string };
+  childCategories: Array<Category>;
+};
+const makeCategoryTree = (categories: Array<Category>): Array<Category> => {
+  const tree = new Map<string, any>();
   // First pass get all the parent categories
   for (let category of categories) {
     if (category.relationships.parent.data == null) {
-      tree[category.id] = { ...category, childCategories: [] };
+      tree.set(category.id, { ...category, childCategories: [] });
     }
   }
   // Second pass add children
   for (let category of categories) {
     if (category.relationships.parent.data != null) {
       const parentId = category.relationships.parent.data.id;
-      tree[parentId]?.childCategories.push(category);
+      tree.get(parentId)?.childCategories.push(category);
     }
   }
-  return Object.values(tree);
+  return Array.from(tree.values());
 };
-export const categoriesQuery = selector<Array<any>>({
+export const categoriesQuery = selector<Array<Category>>({
   key: 'categories',
   get: async ({ get }) => {
     const resp = await fetch('https://api.up.com.au/api/v1/categories', {
@@ -185,19 +214,21 @@ export const categoriesQuery = selector<Array<any>>({
   },
 });
 
-export const categoryNameQuery = selectorFamily({
+export const categoryNameQuery = selectorFamily<string, string>({
   key: 'category-name',
-  get: (categoryId) => ({ get }) => {
-    const categoryTree = get(categoriesQuery);
-    for (let parentCategory of categoryTree) {
-      for (let category of parentCategory.childCategories) {
-        if (category.id === categoryId) {
-          return category.attributes.name;
+  get:
+    (categoryId) =>
+    ({ get }) => {
+      const categoryTree = get(categoriesQuery);
+      for (let parentCategory of categoryTree) {
+        for (let category of parentCategory.childCategories) {
+          if (category.id === categoryId) {
+            return category.attributes.name;
+          }
         }
       }
-    }
-    return 'Uncategorized';
-  },
+      return 'Uncategorized';
+    },
 });
 
 export const tagsQuery = selector<Array<any>>({
@@ -214,15 +245,18 @@ export const tagsQuery = selector<Array<any>>({
   },
 });
 
-export const tagTransactions = (transactionIds, tagId) => {
-  const auth_token = window.localStorage.getItem(LOCALSTORAGE_KEY);
+export const tagTransactions = (
+  transactionIds: Array<string>,
+  tagId: string,
+) => {
+  const apiKey = window.localStorage.getItem(LOCALSTORAGE_KEY);
   const requests = transactionIds.map((tid) => {
     return fetch(
       `https://api.up.com.au/api/v1/transactions/${tid}/relationships/tags`,
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${auth_token}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ data: [{ type: 'tags', id: tagId }] }),

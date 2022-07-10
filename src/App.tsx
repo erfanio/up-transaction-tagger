@@ -18,7 +18,6 @@ function ApiKeyForm({ onSubmit }: ApiKeyFormProps) {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(apiKey);
     onSubmit(apiKey);
   };
 

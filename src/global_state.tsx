@@ -3,22 +3,26 @@ import {
   selector,
   selectorFamily,
   useRecoilTransaction_UNSTABLE,
+  waitForAll,
 } from 'recoil';
 import {
   accountsQuery,
   categoriesQuery,
-  paginaedTransactionsState,
+  paginatedTransactionsState,
 } from './api_client';
 
 export const UNCATEGORIZED_ID = 'uncategorized';
 export const NOT_COVERED_ID = 'none';
 
-export const filtersState = atom({
+type Filters = {
+  [key: string]: { [key: string]: boolean };
+};
+export const filtersState = atom<Filters>({
   key: 'applied-filters',
   default: selector({
     key: 'applied-filter/default',
     get: ({ get }) => {
-      const allFilters = {
+      const allFilters: Filters = {
         categories: { [UNCATEGORIZED_ID]: true },
         coverAccounts: { [NOT_COVERED_ID]: true },
       };
@@ -42,42 +46,47 @@ export const filtersState = atom({
 
 export const filteredTransactionsQuery = selectorFamily<any, string>({
   key: 'filtered-transactions',
-  get: (accountId) => ({ get }) => {
-    const transactions = get(paginaedTransactionsState(accountId));
-    const { categories, coverAccounts } = get(filtersState);
+  get:
+    (accountId) =>
+    ({ get }) => {
+      const transactions = get(paginatedTransactionsState(accountId));
+      const { categories, coverAccounts } = get(filtersState);
 
-    const filtered = transactions.list
-      .filter((transaction) => {
-        const transactionCategory = transaction.relationships.category.data;
-        if (transactionCategory === null) return categories[UNCATEGORIZED_ID];
-        return categories[transactionCategory.id];
-      })
-      .filter((transaction) => {
-        if (!transaction.coverTransaction) return coverAccounts[NOT_COVERED_ID];
-        const coveredAccount =
-          transaction.coverTransaction.relationships.transferAccount.data;
-        return coverAccounts[coveredAccount.id];
-      });
+      const filtered = transactions.list
+        .filter((transaction) => {
+          const transactionCategory = transaction.relationships.category.data;
+          if (transactionCategory === null) return categories[UNCATEGORIZED_ID];
+          return categories[transactionCategory.id];
+        })
+        .filter((transaction) => {
+          if (!transaction.coverTransaction)
+            return coverAccounts[NOT_COVERED_ID];
+          const coveredAccount =
+            transaction.coverTransaction.relationships.transferAccount.data;
+          return coverAccounts[coveredAccount.id];
+        });
 
-    return filtered;
-  },
+      return filtered;
+    },
 });
 
-export const selectedTransactionsState = atom({
+export const selectedTransactionsState = atom<Set<string>>({
   key: 'selected-transactions',
   default: new Set(),
 });
 
-export const selectedTransactionsQuery = selector({
-  key: 'selected -transactions-query',
+export const selectedTransactionsQuery = selector<Array<any>>({
+  key: 'selected-transactions-query',
   get: async ({ get }) => {
     const accounts = await get(accountsQuery);
+    const accountsTransactionLists = get(
+      waitForAll(
+        accounts.map((account) => filteredTransactionsQuery(account.id)),
+      ),
+    );
     const transactions = [];
-    for (let account of accounts) {
-      const accountTransactions = await get(
-        filteredTransactionsQuery(account.id),
-      );
-      transactions.push(...accountTransactions);
+    for (let accountTransactionList of accountsTransactionLists) {
+      transactions.push(...accountTransactionList);
     }
 
     const selectedTransactionIds = get(selectedTransactionsState);

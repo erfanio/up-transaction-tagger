@@ -1,7 +1,7 @@
 import {
   loadMoreTransactions,
   accountNameQuery,
-  paginaedTransactionsState,
+  paginatedTransactionsState,
   apiKeyState,
   categoryNameQuery,
 } from './api_client';
@@ -13,7 +13,7 @@ import { useRecoilValue, useRecoilState } from 'recoil';
 import React, { useState, useReducer } from 'react';
 import classnames from 'classnames';
 
-function CoverTransaction({ transaction }) {
+function CoverTransaction({ transaction }: { transaction: any }) {
   const {
     description,
     amount: { value },
@@ -25,7 +25,15 @@ function CoverTransaction({ transaction }) {
   );
 }
 
-function Transaction({ transaction, selected, onSelectChange }) {
+function Transaction({
+  transaction,
+  selected,
+  onSelectChange,
+}: {
+  transaction: any;
+  selected: boolean;
+  onSelectChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
   const {
     description,
     amount: { value },
@@ -58,8 +66,8 @@ function Transaction({ transaction, selected, onSelectChange }) {
       </p>
       <p className="tags">
         {transaction.relationships.tags.data &&
-          transaction.relationships.tags.data.map((tag) => (
-            <span id={tag.id}>{tag.id}</span>
+          transaction.relationships.tags.data.map((tag: any) => (
+            <span key={tag.id}>{tag.id}</span>
           ))}
       </p>
       {transaction.coverTransaction && (
@@ -71,14 +79,36 @@ function Transaction({ transaction, selected, onSelectChange }) {
 
 let lastSelectPos = 0;
 
-export default function Transactions({ accountId }) {
+function LoadMoreButton({ accountId }: { accountId: string }) {
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [paginatedTransactions, setPaginatedTransactions] = useRecoilState(
+    paginatedTransactionsState(accountId),
+  );
+
+  const handleMore = async () => {
+    setLoadingMore(true);
+    setPaginatedTransactions(await loadMoreTransactions(paginatedTransactions));
+    setLoadingMore(false);
+  };
+
+  if (paginatedTransactions.nextUrl) {
+    if (loadingMore) {
+      return <p>Loading more....</p>;
+    } else {
+      return <p onClick={handleMore}>Load more!</p>;
+    }
+  }
+  return null;
+}
+
+export default function Transactions({ accountId }: { accountId: string }) {
   const filteredTransactions = useRecoilValue(
     filteredTransactionsQuery(accountId),
   );
   const [selectedTransactions, setSelectedTransactions] = useRecoilState(
     selectedTransactionsState,
   );
-  const selectedTransactionsDispatch = (action) => {
+  const selectedTransactionsDispatch = (action: { transactionIds: Array<string>, selected: boolean }) => {
     const { transactionIds, selected } = action;
     setSelectedTransactions((currentSelection) => {
       if (selected) {
@@ -90,50 +120,34 @@ export default function Transactions({ accountId }) {
     });
   };
 
-  const handleSelect = (transactionId: string) => (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const pos = filteredTransactions.findIndex((t) => t.id === transactionId);
-    if (event.nativeEvent.shiftKey) {
-      const [first, last] =
-        lastSelectPos < pos ? [lastSelectPos, pos] : [pos, lastSelectPos];
-      const transactionIds = filteredTransactions
-        .slice(first, last + 1)
-        .filter((transaction) => transaction.attributes.isCategorizable)
-        .map((transaction) => transaction.id);
-      selectedTransactionsDispatch({
-        transactionIds,
-        selected: event.target.checked,
-      });
-    } else {
-      lastSelectPos = pos;
-      selectedTransactionsDispatch({
-        transactionIds: [transactionId],
-        selected: event.target.checked,
-      });
-    }
-  };
-
-  const [paginatedTransactions, setPaginatedTransactions] = useRecoilState(
-    paginaedTransactionsState(accountId),
-  );
-  const apiKey = useRecoilValue(apiKeyState);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  const handleMore = () => {
-    setLoadingMore(true);
-    loadMoreTransactions({
-      paginatedTransactions,
-      setPaginatedTransactions,
-      apiKey: apiKey!,
-    }).then(() => setLoadingMore(false));
-  };
+  const handleSelect =
+    (transactionId: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      const pos = filteredTransactions.findIndex((t: any) => t.id === transactionId);
+      if (event.nativeEvent.shiftKey) {
+        const [first, last] =
+          lastSelectPos < pos ? [lastSelectPos, pos] : [pos, lastSelectPos];
+        const transactionIds = filteredTransactions
+          .slice(first, last + 1)
+          .filter((transaction: any) => transaction.attributes.isCategorizable)
+          .map((transaction: any) => transaction.id);
+        selectedTransactionsDispatch({
+          transactionIds,
+          selected: event.target.checked,
+        });
+      } else {
+        lastSelectPos = pos;
+        selectedTransactionsDispatch({
+          transactionIds: [transactionId],
+          selected: event.target.checked,
+        });
+      }
+    };
 
   return (
     <>
       {filteredTransactions
-        .filter((transaction) => !transaction.originalTransactionId)
-        .map((transaction) => (
+        .filter((transaction: any) => !transaction.originalTransactionId)
+        .map((transaction: any) => (
           <Transaction
             key={transaction.id}
             transaction={transaction}
@@ -141,12 +155,7 @@ export default function Transactions({ accountId }) {
             onSelectChange={handleSelect(transaction.id)}
           />
         ))}
-      {paginatedTransactions.nextUrl &&
-        (!loadingMore ? (
-          <p onClick={handleMore}>Load more!</p>
-        ) : (
-          <p>Loading more....</p>
-        ))}
+      <LoadMoreButton accountId={accountId} />
     </>
   );
 }
