@@ -5,7 +5,7 @@ import Accounts from './Accounts';
 import ActionBar from './ActionBar';
 import Filters from './Filters';
 
-import './styles.css';
+import './App.css';
 
 type ApiKeyFormProps = {
   onSubmit: (apiKey: string) => void;
@@ -55,9 +55,9 @@ export default function App() {
   return (
     <WithApiKey>
       <React.Suspense fallback={<p>Loading accounts...</p>}>
-        <Filters />
+        {/* <Filters /> */}
         <Accounts />
-        <ActionBar />
+        {/* <ActionBar /> */}
       </React.Suspense>
     </WithApiKey>
   );

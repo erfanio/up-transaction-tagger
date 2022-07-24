@@ -4,6 +4,8 @@ import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 import React, { useState } from 'react';
 import Transactions from './Transactions';
 
+import './Accounts.css';
+
 const TRIANGLE_DOWN = '▾';
 const TRIANGLE_RIGHT = '▸';
 
@@ -18,7 +20,7 @@ function Account({ account }: { account: any }) {
   );
 
   return (
-    <div className="Account">
+    <div className="account">
       <p className="name" onClick={handleClick}>
         {expanded ? (
           <span>{TRIANGLE_DOWN}&nbsp;</span>
@@ -39,8 +41,6 @@ export default function Accounts() {
 
   return (
     <>
-      <hr />
-      <p>Accounts</p>
       {accounts.map((account) => (
         <Account key={account.id} account={account} />
       ))}

@@ -214,8 +214,8 @@ export const categoriesQuery = selector<Array<Category>>({
   },
 });
 
-export const categoryNameQuery = selectorFamily<string, string>({
-  key: 'category-name',
+export const categoryLookupQuery = selectorFamily<any | null, string>({
+  key: 'category-lookup',
   get:
     (categoryId) =>
     ({ get }) => {
@@ -223,11 +223,11 @@ export const categoryNameQuery = selectorFamily<string, string>({
       for (let parentCategory of categoryTree) {
         for (let category of parentCategory.childCategories) {
           if (category.id === categoryId) {
-            return category.attributes.name;
+            return category;
           }
         }
       }
-      return 'Uncategorized';
+      return null;
     },
 });
 
@@ -264,7 +264,5 @@ export const tagTransactions = (
     );
   });
 
-  return Promise.all(requests)
-    .then((done) => console.log(done))
-    .catch((e) => console.error(e));
+  return Promise.all(requests);
 };

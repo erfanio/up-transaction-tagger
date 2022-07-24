@@ -48,9 +48,7 @@ function AddTag({ closePopup }: { closePopup: () => void }) {
   if (loading) {
     return (
       <div className="AddTag">
-        <div className="popup-content">
-          Loading...
-        </div>
+        <div className="popup-content">Loading...</div>
       </div>
     );
   }
@@ -91,7 +89,9 @@ function AddTag({ closePopup }: { closePopup: () => void }) {
 }
 
 export default function ActionBar() {
-  const [selectedTransactions, setSelectedTransactions] = useRecoilState(selectedTransactionsState);
+  const [selectedTransactions, setSelectedTransactions] = useRecoilState(
+    selectedTransactionsState,
+  );
   const [tagPopup, setTagPopup] = useState(false);
   const changeTagPopup = (open: boolean) => () => setTagPopup(open);
   const clearSelection = () => setSelectedTransactions(new Set());

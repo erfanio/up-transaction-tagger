@@ -3,7 +3,7 @@ import {
   accountNameQuery,
   paginatedTransactionsState,
   apiKeyState,
-  categoryNameQuery,
+  categoryLookupQuery,
 } from './api_client';
 import {
   filteredTransactionsQuery,
@@ -13,15 +13,20 @@ import { useRecoilValue, useRecoilState } from 'recoil';
 import React, { useState, useReducer } from 'react';
 import classnames from 'classnames';
 
-function CoverTransaction({ transaction }: { transaction: any }) {
+import './Transactions.css';
+
+function Category({ category }: { category: any }) {
   const {
-    description,
-    amount: { value },
-  } = transaction.attributes;
+    attributes: { name },
+    relationships: {
+      parent: {
+        data: { id: parentCategoryId },
+      },
+    },
+  } = category;
+
   return (
-    <p>
-      &nbsp;└ {description} ({value})
-    </p>
+    <span className={classnames('category', parentCategoryId)}>{name}</span>
   );
 }
 
@@ -38,41 +43,56 @@ function Transaction({
     description,
     amount: { value },
     isCategorizable,
+    createdAt,
   } = transaction.attributes;
-  const transferAccountId = transaction.relationships.transferAccount.data
-    ? transaction.relationships.transferAccount.data.id
+  const category = useRecoilValue(
+    categoryLookupQuery(transaction.relationships.category.data?.id),
+  );
+
+  const coverAccountId = transaction.coverTransaction
+    ? transaction.coverTransaction.relationships.transferAccount.data.id
     : null;
-  const transferAccountName = useRecoilValue(
-    accountNameQuery(transferAccountId),
-  );
-  const categoryName = useRecoilValue(
-    categoryNameQuery(transaction.relationships.category.data?.id),
-  );
+  const coverAccountName = useRecoilValue(accountNameQuery(coverAccountId));
+  const coverEmoji = coverAccountName && coverAccountName.split(' ')[0];
+
+  const options: Intl.DateTimeFormatOptions = {
+    hour: 'numeric',
+    minute: 'numeric',
+  };
+  const time = new Date(createdAt).toLocaleTimeString('en-AU', options);
 
   return (
     <div className={classnames('Transaction', { disabled: !isCategorizable })}>
-      <p>
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onSelectChange}
-          disabled={!isCategorizable}
-        />
-        {description} <span>({value})</span>
-        {transferAccountName != null && (
-          <span> (from {transferAccountName})</span>
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onSelectChange}
+        disabled={!isCategorizable}
+      />
+      <div>
+        <p className="time">{time}</p>
+        <p>
+          {description}
+          {coverEmoji && <span className="cover-emoji">{coverEmoji}</span>}
+        </p>
+        <p className="category-tags">
+          {category && <Category category={category} />}
+          {transaction.relationships.tags.data &&
+            transaction.relationships.tags.data.map((tag: any) => (
+              <span key={tag.id} className="tag">
+                {tag.id}
+              </span>
+            ))}
+        </p>
+      </div>
+      <div className="left-side">
+        <p className={classnames('price', { positive: value > 0 })}>
+          {value < 0 ? `$${Math.abs(value)}` : `+$${value}`}
+        </p>
+        {transaction.coverTransaction && (
+          <p className="covered">{value < 0 ? '<- Covered' : 'Forwarded ->'}</p>
         )}
-        <span> in {categoryName}</span>
-      </p>
-      <p className="tags">
-        {transaction.relationships.tags.data &&
-          transaction.relationships.tags.data.map((tag: any) => (
-            <span key={tag.id}>{tag.id}</span>
-          ))}
-      </p>
-      {transaction.coverTransaction && (
-        <CoverTransaction transaction={transaction.coverTransaction} />
-      )}
+      </div>
     </div>
   );
 }
@@ -93,9 +113,17 @@ function LoadMoreButton({ accountId }: { accountId: string }) {
 
   if (paginatedTransactions.nextUrl) {
     if (loadingMore) {
-      return <p>Loading more....</p>;
+      return (
+        <button className="load-more" disabled>
+          Loading more....
+        </button>
+      );
     } else {
-      return <p onClick={handleMore}>Load more!</p>;
+      return (
+        <button className="load-more" onClick={handleMore}>
+          Load more!
+        </button>
+      );
     }
   }
   return null;
@@ -108,7 +136,10 @@ export default function Transactions({ accountId }: { accountId: string }) {
   const [selectedTransactions, setSelectedTransactions] = useRecoilState(
     selectedTransactionsState,
   );
-  const selectedTransactionsDispatch = (action: { transactionIds: Array<string>, selected: boolean }) => {
+  const selectedTransactionsDispatch = (action: {
+    transactionIds: Array<string>;
+    selected: boolean;
+  }) => {
     const { transactionIds, selected } = action;
     setSelectedTransactions((currentSelection) => {
       if (selected) {
@@ -122,8 +153,10 @@ export default function Transactions({ accountId }: { accountId: string }) {
 
   const handleSelect =
     (transactionId: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      const pos = filteredTransactions.findIndex((t: any) => t.id === transactionId);
-      if (event.nativeEvent.shiftKey) {
+      const pos = filteredTransactions.findIndex(
+        (t: any) => t.id === transactionId,
+      );
+      if ((event.nativeEvent as KeyboardEvent).shiftKey) {
         const [first, last] =
           lastSelectPos < pos ? [lastSelectPos, pos] : [pos, lastSelectPos];
         const transactionIds = filteredTransactions
@@ -143,19 +176,60 @@ export default function Transactions({ accountId }: { accountId: string }) {
       }
     };
 
+  const transactionsByDateMap = filteredTransactions
+    .filter((transaction: any) => !transaction.originalTransactionId)
+    .reduce((acc: Map<string, any>, transaction: any) => {
+      const d = new Date(transaction.attributes.createdAt);
+      const dateString = `${d.getFullYear()}-${
+        d.getMonth() + 1
+      }-${d.getDate()}`;
+
+      if (!acc.has(dateString)) {
+        acc.set(dateString, []);
+      }
+
+      acc.get(dateString).push(transaction);
+
+      return acc;
+    }, new Map());
+  const transactionsByDateEntries: [string, any[]][] = Array.from(
+    transactionsByDateMap.entries(),
+  );
+  const transactionsByDate = transactionsByDateEntries
+    .sort(([a, _], [b, __]) => new Date(b).getTime() - new Date(a).getTime())
+    .map(([dateString, transactions]) => {
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      };
+      const date = new Date(dateString).toLocaleDateString('en-AU', options);
+      transactions.sort(
+        (a, b) =>
+          new Date(b.attributes.createdAt).getTime() -
+          new Date(a.attributes.createdAt).getTime(),
+      );
+      return { date, transactions };
+    });
   return (
-    <>
-      {filteredTransactions
-        .filter((transaction: any) => !transaction.originalTransactionId)
-        .map((transaction: any) => (
-          <Transaction
-            key={transaction.id}
-            transaction={transaction}
-            selected={selectedTransactions.has(transaction.id)}
-            onSelectChange={handleSelect(transaction.id)}
-          />
-        ))}
+    <div className="Transactions">
+      {transactionsByDate.map(
+        ({ date, transactions }: { date: string; transactions: any }) => (
+          <div key={date}>
+            <p className="date">{date}</p>
+            {transactions.map((transaction: any) => (
+              <Transaction
+                key={transaction.id}
+                transaction={transaction}
+                selected={selectedTransactions.has(transaction.id)}
+                onSelectChange={handleSelect(transaction.id)}
+              />
+            ))}
+          </div>
+        ),
+      )}
       <LoadMoreButton accountId={accountId} />
-    </>
+    </div>
   );
 }

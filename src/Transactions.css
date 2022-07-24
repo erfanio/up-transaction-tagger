@@ -1,0 +1,109 @@
+.Transactions {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.Transactions .date {
+  padding: 9px 20px;
+  background: #f4f4f3;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  color: #7a7a81;
+  font-weight: 500;
+}
+
+.Transactions .load-more {
+  padding: 10px 20px;
+  border: none;
+  background: #fdfdfd;
+  border-top: 1px #eaeaea solid;
+  border-radius: 3px;
+}
+
+.Transactions .load-more:active {
+  background: #e2e2e1;
+}
+
+.Transaction {
+  padding: 10px 20px;
+  display: flex;
+  flex-flow: row nowrap;
+  border-bottom: 1px #eaeaea solid;
+}
+
+.Transaction:last-child {
+  border-bottom: none;
+}
+
+.Transaction input {
+  margin: 10px 20px 10px 0;
+  align-self: center;
+}
+
+.Transaction .time {
+  font-size: 0.8em;
+  color: #7a7a81;
+  margin-bottom: 3px;
+}
+
+.Transaction .cover-emoji {
+  display: inline-block;
+  font-size: 0.6em;
+  background-color: #e5e5e5;
+  border-radius: 99999px;
+  padding: 3px;
+  position: relative;
+  top: -10px;
+}
+
+.Transaction .category-tags {
+  margin-top: 7px;
+  font-size: 0.9em;
+}
+
+.Transaction .category-tags span {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  margin-right: 5px;
+}
+
+.Transaction .category.personal {
+  background-color: #ffe0cc;
+}
+.Transaction .category.transport {
+  background-color: #d7e6f4;
+}
+.Transaction .category.home {
+  background-color: #f0dbef;
+}
+.Transaction .category.good-life {
+  background-color: #fdf1b5;
+}
+
+.Transaction .tag {
+  background: #e5e5e5;
+}
+
+.Transaction .left-side {
+  flex-grow: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-end;
+  align-self: center;
+}
+
+.Transaction .price {
+  font-size: 0.95em;
+  font-weight: 500;
+  margin: 3px 0;
+}
+
+.Transaction .price.positive {
+  color: #00bc83;
+}
+
+.Transaction .covered {
+  font-size: 0.8em;
+  color: #7a7a81;
+}

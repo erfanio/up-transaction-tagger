@@ -1,0 +1,11 @@
+.account {
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  margin: 10px auto;
+  max-width: 500px;
+}
+
+.account > .name {
+  padding: 20px;
+  cursor: pointer;
+}
