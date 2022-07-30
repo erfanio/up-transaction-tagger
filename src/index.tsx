@@ -3,6 +3,8 @@ import App from './App';
 import { RecoilRoot } from 'recoil';
 import { StrictMode } from 'react';
 
+import './vendor/normalize.css';
+
 const rootElement = document.getElementById('root')!;
 const root = ReactDOMClient.createRoot(rootElement);
 

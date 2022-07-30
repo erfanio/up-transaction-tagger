@@ -15,14 +15,12 @@
 .Transactions .load-more {
   padding: 10px 20px;
   border: none;
-  background: #fdfdfd;
+  background: #fdfdfd content-box;
   border-top: 1px #eaeaea solid;
-  border-radius: 3px;
 }
 
-.Transactions .load-more:active {
-  background: #e2e2e1;
-}
+.Transactions .load-more:not([disabled]):hover { background: #f3f3f2 }
+.Transactions .load-more:not([disabled]):active { background: #e2e2e1 }
 
 .Transaction {
   padding: 10px 20px;

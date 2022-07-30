@@ -10,7 +10,7 @@ import {
   selectedTransactionsState,
 } from './global_state';
 import { useRecoilValue, useRecoilState } from 'recoil';
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useCallback, useMemo } from 'react';
 import classnames from 'classnames';
 
 import './Transactions.css';
@@ -30,15 +30,15 @@ function Category({ category }: { category: any }) {
   );
 }
 
-function Transaction({
+const Transaction = React.memo(({
   transaction,
   selected,
   onSelectChange,
 }: {
   transaction: any;
   selected: boolean;
-  onSelectChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
+  onSelectChange: (transactionId: string, event: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
   const {
     description,
     amount: { value },
@@ -66,7 +66,7 @@ function Transaction({
       <input
         type="checkbox"
         checked={selected}
-        onChange={onSelectChange}
+        onChange={(event) => onSelectChange(transaction.id, event)}
         disabled={!isCategorizable}
       />
       <div>
@@ -95,7 +95,7 @@ function Transaction({
       </div>
     </div>
   );
-}
+});
 
 let lastSelectPos = 0;
 
@@ -136,23 +136,26 @@ export default function Transactions({ accountId }: { accountId: string }) {
   const [selectedTransactions, setSelectedTransactions] = useRecoilState(
     selectedTransactionsState,
   );
-  const selectedTransactionsDispatch = (action: {
-    transactionIds: Array<string>;
-    selected: boolean;
-  }) => {
-    const { transactionIds, selected } = action;
-    setSelectedTransactions((currentSelection) => {
-      if (selected) {
-        transactionIds.forEach((id) => currentSelection.add(id));
-      } else {
-        transactionIds.forEach((id) => currentSelection.delete(id));
-      }
-      return new Set(currentSelection);
-    });
-  };
+  const selectedTransactionsDispatch = useCallback(
+    (action: {
+      transactionIds: Array<string>;
+      selected: boolean;
+    }) => {
+      const { transactionIds, selected } = action;
+      setSelectedTransactions((currentSelection) => {
+        if (selected) {
+          transactionIds.forEach((id) => currentSelection.add(id));
+        } else {
+          transactionIds.forEach((id) => currentSelection.delete(id));
+        }
+        return new Set(currentSelection);
+      });
+    },
+    [setSelectedTransactions]
+  );
 
-  const handleSelect =
-    (transactionId: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelect = useCallback(
+    (transactionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
       const pos = filteredTransactions.findIndex(
         (t: any) => t.id === transactionId,
       );
@@ -174,44 +177,51 @@ export default function Transactions({ accountId }: { accountId: string }) {
           selected: event.target.checked,
         });
       }
-    };
-
-  const transactionsByDateMap = filteredTransactions
-    .filter((transaction: any) => !transaction.originalTransactionId)
-    .reduce((acc: Map<string, any>, transaction: any) => {
-      const d = new Date(transaction.attributes.createdAt);
-      const dateString = `${d.getFullYear()}-${
-        d.getMonth() + 1
-      }-${d.getDate()}`;
-
-      if (!acc.has(dateString)) {
-        acc.set(dateString, []);
-      }
-
-      acc.get(dateString).push(transaction);
-
-      return acc;
-    }, new Map());
-  const transactionsByDateEntries: [string, any[]][] = Array.from(
-    transactionsByDateMap.entries(),
+    },
+    [filteredTransactions,  selectedTransactionsDispatch]
   );
-  const transactionsByDate = transactionsByDateEntries
-    .sort(([a, _], [b, __]) => new Date(b).getTime() - new Date(a).getTime())
-    .map(([dateString, transactions]) => {
-      const options: Intl.DateTimeFormatOptions = {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      };
-      const date = new Date(dateString).toLocaleDateString('en-AU', options);
-      transactions.sort(
-        (a, b) =>
-          new Date(b.attributes.createdAt).getTime() -
-          new Date(a.attributes.createdAt).getTime(),
+
+  const transactionsByDate = useMemo(
+    () => {
+      const transactionsByDateMap = filteredTransactions
+        .filter((transaction: any) => !transaction.originalTransactionId)
+        .reduce((acc: Map<string, any>, transaction: any) => {
+          const d = new Date(transaction.attributes.createdAt);
+          const dateString = `${d.getFullYear()}-${
+            d.getMonth() + 1
+          }-${d.getDate()}`;
+
+          if (!acc.has(dateString)) {
+            acc.set(dateString, []);
+          }
+
+          acc.get(dateString).push(transaction);
+
+          return acc;
+        }, new Map());
+      const transactionsByDateEntries: [string, any[]][] = Array.from(
+        transactionsByDateMap.entries(),
       );
-      return { date, transactions };
-    });
+      return transactionsByDateEntries
+        .sort(([a, _], [b, __]) => new Date(b).getTime() - new Date(a).getTime())
+        .map(([dateString, transactions]) => {
+          const options: Intl.DateTimeFormatOptions = {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          };
+          const date = new Date(dateString).toLocaleDateString('en-AU', options);
+          transactions.sort(
+            (a, b) =>
+              new Date(b.attributes.createdAt).getTime() -
+              new Date(a.attributes.createdAt).getTime(),
+          );
+          return { date, transactions };
+        });
+    },
+    [filteredTransactions]
+  );
   return (
     <div className="Transactions">
       {transactionsByDate.map(
@@ -223,7 +233,7 @@ export default function Transactions({ accountId }: { accountId: string }) {
                 key={transaction.id}
                 transaction={transaction}
                 selected={selectedTransactions.has(transaction.id)}
-                onSelectChange={handleSelect(transaction.id)}
+                onSelectChange={handleSelect}
               />
             ))}
           </div>
