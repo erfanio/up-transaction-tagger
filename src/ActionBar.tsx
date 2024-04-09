@@ -12,6 +12,8 @@ import {
 import { useRecoilValue, useRecoilCallback, useRecoilState } from 'recoil';
 import React, { useState } from 'react';
 
+import './ActionBar.css';
+
 function AddTag({ closePopup }: { closePopup: () => void }) {
   const selectedTransactionIds = useRecoilValue(selectedTransactionsState);
   const selectedTransactions = useRecoilValue(selectedTransactionsQuery);
@@ -31,8 +33,8 @@ function AddTag({ closePopup }: { closePopup: () => void }) {
         await tagTransactions(Array.from(selectedTransactionIds), selectedTag);
 
         const accounts = snapshot.getLoadable(accountsQuery).valueOrThrow();
-        for (let account of accounts) {
-          let transactionCount = snapshot
+        for (const account of accounts) {
+          const transactionCount = snapshot
             .getLoadable(paginatedTransactionsState(account.id))
             .valueOrThrow().list.length;
           set(
@@ -96,7 +98,9 @@ export default function ActionBar() {
   const changeTagPopup = (open: boolean) => () => setTagPopup(open);
   const clearSelection = () => setSelectedTransactions(new Set());
 
-  if (selectedTransactions.size === 0) return null;
+  if (selectedTransactions.size === 0) {
+    return null;
+  }
   return (
     <>
       <div className="ActionBar">

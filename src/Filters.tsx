@@ -3,6 +3,8 @@ import { filtersState, NOT_COVERED_ID, UNCATEGORIZED_ID } from './global_state';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import React, { useState } from 'react';
 
+import 'Filters.css';
+
 const TRIANGLE_DOWN = '▾';
 const TRIANGLE_RIGHT = '▸';
 
@@ -55,7 +57,7 @@ function FilterListGroup({
   const checked = group.items!.every((item) => filters[filterKey][item.id]);
   const handleCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
     const changedFilters: { [key: string]: boolean } = {};
-    for (let item of group.items!) {
+    for (const item of group.items!) {
       changedFilters[item.id] = event.target.checked;
     }
     setFilters((filters) => ({

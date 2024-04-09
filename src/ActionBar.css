@@ -1,25 +1,3 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: sans-serif;
-}
-
-.Account > .name,
-.FilterList > .name {
-  cursor: pointer;
-}
-
-.Transaction.disabled {
-  color: gray;
-}
-
-.tags {
-  font-size: 0.8em;
-  line-height: 0.8em;
-}
-
 .ActionBar {
   position: fixed;
   bottom: 0;
@@ -65,4 +43,9 @@ body {
 }
 .affected-transactions {
   overflow: auto;
+}
+
+.tags {
+  font-size: 0.8em;
+  line-height: 0.8em;
 }

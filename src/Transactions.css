@@ -3,6 +3,10 @@
   flex-flow: column nowrap;
 }
 
+.Transaction.disabled {
+  color: gray;
+}
+
 .Transactions .date {
   padding: 9px 20px;
   background: #f4f4f3;
@@ -19,8 +23,12 @@
   border-top: 1px #eaeaea solid;
 }
 
-.Transactions .load-more:not([disabled]):hover { background: #f3f3f2 }
-.Transactions .load-more:not([disabled]):active { background: #e2e2e1 }
+.Transactions .load-more:not([disabled]):hover {
+  background: #f3f3f2;
+}
+.Transactions .load-more:not([disabled]):active {
+  background: #e2e2e1;
+}
 
 .Transaction {
   padding: 10px 20px;

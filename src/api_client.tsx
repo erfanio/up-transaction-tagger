@@ -1,10 +1,4 @@
-import {
-  atom,
-  selector,
-  atomFamily,
-  selectorFamily,
-  SetterOrUpdater,
-} from 'recoil';
+import { atom, selector, atomFamily, selectorFamily } from 'recoil';
 
 const LOCALSTORAGE_KEY = 'up-tagger-api-key';
 
@@ -37,10 +31,14 @@ export const accountNameQuery = selectorFamily<string | null, string>({
   get:
     (accountId) =>
     ({ get }) => {
-      if (accountId === null) return null;
+      if (accountId === null) {
+        return null;
+      }
       const accounts = get(accountsQuery);
       const match = accounts.find((account) => account.id === accountId);
-      if (match === undefined) return 'UNKNOWN';
+      if (match === undefined) {
+        return 'UNKNOWN';
+      }
       return match.attributes.displayName;
     },
 });
@@ -48,7 +46,7 @@ export const accountNameQuery = selectorFamily<string | null, string>({
 const findCovers = (transactions: Array<any>) => {
   const covers = new Map<number, Array<any>>();
   const newTransactions = [];
-  for (let transaction of transactions) {
+  for (const transaction of transactions) {
     const { description, amount, isCategorizable } = transaction.attributes;
     const newTransaction = { ...transaction };
     // Ignore already matched transactions
@@ -129,7 +127,9 @@ export const paginatedTransactionsState = atomFamily<
 export const loadMoreTransactions = async (
   paginatedTransactions: PaginatedTransactions,
 ): Promise<PaginatedTransactions> => {
-  if (!paginatedTransactions.nextUrl) return paginatedTransactions;
+  if (!paginatedTransactions.nextUrl) {
+    return paginatedTransactions;
+  }
 
   const apiKey = window.localStorage.getItem(LOCALSTORAGE_KEY);
   const resp = await fetch(paginatedTransactions.nextUrl, {
@@ -186,13 +186,13 @@ type Category = {
 const makeCategoryTree = (categories: Array<Category>): Array<Category> => {
   const tree = new Map<string, any>();
   // First pass get all the parent categories
-  for (let category of categories) {
+  for (const category of categories) {
     if (category.relationships.parent.data == null) {
       tree.set(category.id, { ...category, childCategories: [] });
     }
   }
   // Second pass add children
-  for (let category of categories) {
+  for (const category of categories) {
     if (category.relationships.parent.data != null) {
       const parentId = category.relationships.parent.data.id;
       tree.get(parentId)?.childCategories.push(category);
@@ -220,8 +220,8 @@ export const categoryLookupQuery = selectorFamily<any | null, string>({
     (categoryId) =>
     ({ get }) => {
       const categoryTree = get(categoriesQuery);
-      for (let parentCategory of categoryTree) {
-        for (let category of parentCategory.childCategories) {
+      for (const parentCategory of categoryTree) {
+        for (const category of parentCategory.childCategories) {
           if (category.id === categoryId) {
             return category;
           }

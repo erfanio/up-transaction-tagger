@@ -28,14 +28,14 @@ export const filtersState = atom<Filters>({
       };
 
       const parentCategories = get(categoriesQuery);
-      for (let category of parentCategories) {
-        for (let childCategory of category.childCategories) {
+      for (const category of parentCategories) {
+        for (const childCategory of category.childCategories) {
           allFilters.categories[childCategory.id] = true;
         }
       }
 
       const accounts = get(accountsQuery);
-      for (let account of accounts) {
+      for (const account of accounts) {
         allFilters.coverAccounts[account.id] = true;
       }
 
@@ -55,14 +55,21 @@ export const filteredTransactionsQuery = selectorFamily<any, string>({
       const filtered = transactions.list
         .filter((transaction) => {
           const transactionCategory = transaction.relationships.category.data;
-          if (transactionCategory === null) return categories[UNCATEGORIZED_ID];
+          if (transactionCategory === null) {
+            return categories[UNCATEGORIZED_ID];
+          }
           return categories[transactionCategory.id];
         })
         .filter((transaction) => {
-          if (!transaction.coverTransaction)
+          console.log(transaction);
+          if (!transaction.coverTransaction) {
             return coverAccounts[NOT_COVERED_ID];
+          }
           const coveredAccount =
             transaction.coverTransaction.relationships.transferAccount.data;
+          if (!coveredAccount) {
+            return coverAccounts[NOT_COVERED_ID];
+          }
           return coverAccounts[coveredAccount.id];
         });
 
@@ -85,7 +92,7 @@ export const selectedTransactionsQuery = selector<Array<any>>({
       ),
     );
     const transactions = [];
-    for (let accountTransactionList of accountsTransactionLists) {
+    for (const accountTransactionList of accountsTransactionLists) {
       transactions.push(...accountTransactionList);
     }
 
