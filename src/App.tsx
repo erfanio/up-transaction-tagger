@@ -53,12 +53,14 @@ function WithApiKey({ children }: WithApiKeyProps) {
 
 export default function App() {
   return (
-    <WithApiKey>
-      <React.Suspense fallback={<p>Loading accounts...</p>}>
-        {/* <Filters /> */}
-        <Accounts />
-        {/* <ActionBar /> */}
-      </React.Suspense>
-    </WithApiKey>
+    <div className="app">
+      <WithApiKey>
+        <React.Suspense fallback={<p>Loading accounts...</p>}>
+          <Filters />
+          <Accounts />
+          <ActionBar />
+        </React.Suspense>
+      </WithApiKey>
+    </div>
   );
 }

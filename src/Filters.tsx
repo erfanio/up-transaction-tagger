@@ -3,7 +3,7 @@ import { filtersState, NOT_COVERED_ID, UNCATEGORIZED_ID } from './global_state';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import React, { useState } from 'react';
 
-import 'Filters.css';
+import './Filters.css';
 
 const TRIANGLE_DOWN = '▾';
 const TRIANGLE_RIGHT = '▸';
@@ -101,7 +101,7 @@ function FilterList({
   };
 
   return (
-    <div className="FilterList">
+    <div className="filter-list">
       <p className="name" onClick={handleClick}>
         {expanded ? (
           <span>{TRIANGLE_DOWN}&nbsp;</span>
@@ -170,19 +170,38 @@ export default function Filters() {
     label: 'Not Covered',
   });
 
+  const [openFilters, setOpenFilters] = useState(false);
+
   return (
-    <div className="filters">
-      <p>Filters</p>
-      <FilterList
-        label="Categories"
-        filterKey="categories"
-        items={categoryItems}
-      />
-      <FilterList
-        label="Cover Accounts"
-        filterKey="coverAccounts"
-        items={coverAccountItems}
-      />
-    </div>
+    <>
+      <button
+        className="filter-button"
+        onClick={() => setOpenFilters(!openFilters)}
+      >
+        {openFilters ? 'Close Filters' : 'Open Filters'}
+      </button>
+      {openFilters && (
+        <div className="filters-overlay">
+          <button
+            className="filter-button"
+            onClick={() => setOpenFilters(false)}
+          >
+            &lsaquo;
+          </button>
+          <div className="filters">
+            <FilterList
+              label="Categories"
+              filterKey="categories"
+              items={categoryItems}
+            />
+            <FilterList
+              label="Cover Accounts"
+              filterKey="coverAccounts"
+              items={coverAccountItems}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

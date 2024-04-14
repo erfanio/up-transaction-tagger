@@ -152,23 +152,27 @@ export const loadMoreTransactions = async (
 
 export const refreshTransactions = async (
   accountId: string,
-  pageSize: number,
+  transactionsToLoad: number,
 ) => {
   const apiKey = window.localStorage.getItem(LOCALSTORAGE_KEY);
-  const resp = await fetch(
-    `https://api.up.com.au/api/v1/accounts/${accountId}/transactions?page[size]=${pageSize}`,
-    {
+  let allTransactions: Array<any> = [];
+  let nextUrl = `https://api.up.com.au/api/v1/accounts/${accountId}/transactions?page[size]=100`;
+  while (transactionsToLoad > 0) {
+    transactionsToLoad -= 100;
+    const resp = await fetch(nextUrl, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
-    },
-  );
-  const json = await resp.json();
-  const withCoverMetadata = findCovers(json.data);
+    });
+    const json = await resp.json();
+    allTransactions = [...allTransactions, ...json.data];
+    nextUrl = json.links.next;
+  }
+  const withCoverMetadata = findCovers(allTransactions);
   return {
     list: withCoverMetadata,
-    nextUrl: json.links.next,
+    nextUrl,
   };
 };
 

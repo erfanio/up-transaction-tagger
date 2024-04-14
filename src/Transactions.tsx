@@ -53,9 +53,11 @@ const Transaction = React.memo(
       categoryLookupQuery(transaction.relationships.category.data?.id),
     );
 
-    const coverAccountId = transaction.coverTransaction
-      ? transaction.coverTransaction.relationships.transferAccount.data.id
-      : null;
+    const coverAccountId =
+      transaction.coverTransaction &&
+      transaction.coverTransaction.relationships.transferAccount.data
+        ? transaction.coverTransaction.relationships.transferAccount.data.id
+        : null;
     const coverAccountName = useRecoilValue(accountNameQuery(coverAccountId));
     const coverEmoji = coverAccountName && coverAccountName.split(' ')[0];
 
@@ -67,7 +69,7 @@ const Transaction = React.memo(
 
     return (
       <div
-        className={classnames('Transaction', { disabled: !isCategorizable })}
+        className={classnames('transaction', { disabled: !isCategorizable })}
       >
         <input
           type="checkbox"
@@ -226,7 +228,7 @@ export default function Transactions({ accountId }: { accountId: string }) {
       });
   }, [filteredTransactions]);
   return (
-    <div className="Transactions">
+    <div className="transactions">
       {transactionsByDate.map(
         ({ date, transactions }: { date: string; transactions: any }) => (
           <div key={date}>

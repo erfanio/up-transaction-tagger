@@ -61,7 +61,6 @@ export const filteredTransactionsQuery = selectorFamily<any, string>({
           return categories[transactionCategory.id];
         })
         .filter((transaction) => {
-          console.log(transaction);
           if (!transaction.coverTransaction) {
             return coverAccounts[NOT_COVERED_ID];
           }
