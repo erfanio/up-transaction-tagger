@@ -2,6 +2,7 @@ import { accountsQuery, categoriesQuery } from './api_client';
 import { filtersState, NOT_COVERED_ID, UNCATEGORIZED_ID } from './global_state';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import React, { useState } from 'react';
+import { ReactComponent as CloseIcon } from './close.svg';
 
 import './Filters.css';
 
@@ -181,12 +182,12 @@ export default function Filters() {
         {openFilters ? 'Close Filters' : 'Open Filters'}
       </button>
       {openFilters && (
-        <div className="filters-overlay">
+        <div className="overlay">
           <button
-            className="filter-button"
+            className="close-overlay-button"
             onClick={() => setOpenFilters(false)}
           >
-            &lsaquo;
+            <CloseIcon fill="#fff"></CloseIcon>
           </button>
           <div className="filters">
             <FilterList
