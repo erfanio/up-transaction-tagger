@@ -1,0 +1,12 @@
+button {
+  display: inline-block;
+  border: none;
+  text-decoration: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}

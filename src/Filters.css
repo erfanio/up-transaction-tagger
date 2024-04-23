@@ -2,8 +2,6 @@
   padding: 10px 20px;
   background-color: #fdfdfd;
   border-radius: 3px;
-  appearance: none;
-  border: none;
 }
 
 .overlay {
@@ -16,12 +14,12 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .overlay .close-overlay-button {
   align-self: end;
-  margin: 20px;
+  margin: 15px;
   background: none;
   border: none;
 }
@@ -40,24 +38,28 @@
     0 12.5px 10px rgba(0, 0, 0, 0.06),
     0 22.3px 17.9px rgba(0, 0, 0, 0.072),
     0 41.8px 33.4px rgba(0, 0, 0, 0.086),
-    0 100px 80px rgba(0, 0, 0, 0.12)
-  ;
+    0 100px 80px rgba(0, 0, 0, 0.12);
   flex-grow: 1;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 }
 
+.filters > h2 {
+  text-align: center;
+}
+
 .filter-list {
-  border-bottom: 1px #ccc solid;
+  border-top: 1px #ccc solid;
 }
 
 .filter-list:last-child {
-  border-bottom: none;
+  border-top: 1px #ccc solid;
+  border-bottom: 1px #ccc solid;
 }
 
 .filter-list > .name {
   cursor: pointer;
-  padding: 10px 20px;
+  padding: 20px;
 }
 
 .filter-list > ul {

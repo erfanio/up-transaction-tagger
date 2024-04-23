@@ -97,7 +97,7 @@ function FilterList({
   filterKey: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = () => {
     setExpanded(!expanded);
   };
 
@@ -105,9 +105,9 @@ function FilterList({
     <div className="filter-list">
       <p className="name" onClick={handleClick}>
         {expanded ? (
-          <span>{TRIANGLE_DOWN}&nbsp;</span>
+          <span>{TRIANGLE_DOWN}&nbsp;&nbsp;</span>
         ) : (
-          <span>{TRIANGLE_RIGHT}&nbsp;</span>
+          <span>{TRIANGLE_RIGHT}&nbsp;&nbsp;</span>
         )}
         {label}
       </p>
@@ -179,7 +179,7 @@ export default function Filters() {
         className="filter-button"
         onClick={() => setOpenFilters(!openFilters)}
       >
-        {openFilters ? 'Close Filters' : 'Open Filters'}
+        Open Filters
       </button>
       {openFilters && (
         <div className="overlay">
@@ -190,6 +190,7 @@ export default function Filters() {
             <CloseIcon fill="#fff"></CloseIcon>
           </button>
           <div className="filters">
+            <h2>Filters</h2>
             <FilterList
               label="Categories"
               filterKey="categories"

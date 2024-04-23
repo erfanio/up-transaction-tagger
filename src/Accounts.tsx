@@ -1,6 +1,5 @@
 import { accountsQuery } from './api_client';
-import { filteredTransactionsQuery } from './global_state';
-import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import React, { useState } from 'react';
 import Transactions from './Transactions';
 
@@ -11,21 +10,17 @@ const TRIANGLE_RIGHT = '▸';
 
 function Account({ account }: { account: any }) {
   const [expanded, setExpanded] = useState(false);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = () => {
     setExpanded(!expanded);
   };
-
-  const transactionsLoadable = useRecoilValueLoadable(
-    filteredTransactionsQuery(account.id),
-  );
 
   return (
     <div className="account">
       <p className="name" onClick={handleClick}>
         {expanded ? (
-          <span>{TRIANGLE_DOWN}&nbsp;</span>
+          <span>{TRIANGLE_DOWN}&nbsp;&nbsp;</span>
         ) : (
-          <span>{TRIANGLE_RIGHT}&nbsp;</span>
+          <span>{TRIANGLE_RIGHT}&nbsp;&nbsp;</span>
         )}
         {account.attributes.displayName}
       </p>

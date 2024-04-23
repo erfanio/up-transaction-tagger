@@ -2,7 +2,6 @@ import {
   loadMoreTransactions,
   accountNameQuery,
   paginatedTransactionsState,
-  apiKeyState,
   categoryLookupQuery,
 } from './api_client';
 import {
@@ -10,7 +9,7 @@ import {
   selectedTransactionsState,
 } from './global_state';
 import { useRecoilValue, useRecoilState } from 'recoil';
-import React, { useState, useReducer, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import classnames from 'classnames';
 
 import './Transactions.css';
@@ -61,11 +60,22 @@ const Transaction = React.memo(
     const coverAccountName = useRecoilValue(accountNameQuery(coverAccountId));
     const coverEmoji = coverAccountName && coverAccountName.split(' ')[0];
 
-    const options: Intl.DateTimeFormatOptions = {
+    const timeOptions: Intl.DateTimeFormatOptions = {
       hour: 'numeric',
       minute: 'numeric',
     };
-    const time = new Date(createdAt).toLocaleTimeString('en-AU', options);
+    const time = new Date(createdAt).toLocaleTimeString('en-AU', timeOptions);
+
+    const positiveAmount = value > 0;
+    const amountOptions = {
+      style: 'currency',
+      currency: 'AUD',
+      trailingZeroDisplay: "stripIfInteger",
+    };
+    const formattedAmount = new Intl.NumberFormat(
+      'en-AU',
+      amountOptions,
+    ).format(Math.abs(value));
 
     return (
       <div
@@ -94,12 +104,12 @@ const Transaction = React.memo(
           </p>
         </div>
         <div className="left-side">
-          <p className={classnames('price', { positive: value > 0 })}>
-            {value < 0 ? `$${Math.abs(value)}` : `+$${value}`}
+          <p className={classnames('price', { positive: positiveAmount })}>
+            {positiveAmount ? `+${formattedAmount}` : formattedAmount}
           </p>
           {transaction.coverTransaction && (
             <p className="covered">
-              {value < 0 ? '<- Covered' : 'Forwarded ->'}
+              {positiveAmount ? 'Forwarded ->' : '<- Covered'}
             </p>
           )}
         </div>
@@ -193,16 +203,26 @@ export default function Transactions({ accountId }: { accountId: string }) {
     const transactionsByDateMap = filteredTransactions
       .filter((transaction: any) => !transaction.originalTransactionId)
       .reduce((acc: Map<string, any>, transaction: any) => {
-        const d = new Date(transaction.attributes.createdAt);
-        const dateString = `${d.getFullYear()}-${
-          d.getMonth() + 1
-        }-${d.getDate()}`;
+        // const options: Intl.DateTimeFormatOptions = {
+        //   hour: 'numeric',
+        //   minute: 'numeric',
+        // };
+        // const time = new Date(createdAt).toLocaleTimeString('en-AU', options);
+        const options: Intl.DateTimeFormatOptions = {
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        };
+        const formattedDate = new Date(
+          transaction.attributes.createdAt,
+        ).toLocaleDateString('en-AU', options);
 
-        if (!acc.has(dateString)) {
-          acc.set(dateString, []);
+        if (!acc.has(formattedDate)) {
+          acc.set(formattedDate, []);
         }
 
-        acc.get(dateString).push(transaction);
+        acc.get(formattedDate).push(transaction);
 
         return acc;
       }, new Map());
@@ -210,29 +230,28 @@ export default function Transactions({ accountId }: { accountId: string }) {
       transactionsByDateMap.entries(),
     );
     return transactionsByDateEntries
-      .sort(([a, _], [b, __]) => new Date(b).getTime() - new Date(a).getTime())
-      .map(([dateString, transactions]) => {
-        const options: Intl.DateTimeFormatOptions = {
-          weekday: 'short',
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        };
-        const date = new Date(dateString).toLocaleDateString('en-AU', options);
+      .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+      .map(([formattedDate, transactions]) => {
         transactions.sort(
           (a, b) =>
             new Date(b.attributes.createdAt).getTime() -
             new Date(a.attributes.createdAt).getTime(),
         );
-        return { date, transactions };
+        return { formattedDate, transactions };
       });
   }, [filteredTransactions]);
   return (
     <div className="transactions">
       {transactionsByDate.map(
-        ({ date, transactions }: { date: string; transactions: any }) => (
-          <div key={date}>
-            <p className="date">{date}</p>
+        ({
+          formattedDate,
+          transactions,
+        }: {
+          formattedDate: string;
+          transactions: any;
+        }) => (
+          <div key={formattedDate}>
+            <p className="date">{formattedDate}</p>
             {transactions.map((transaction: any) => (
               <Transaction
                 key={transaction.id}
