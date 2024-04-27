@@ -3,6 +3,7 @@ import { filtersState, NOT_COVERED_ID, UNCATEGORIZED_ID } from './global_state';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import React, { useState } from 'react';
 import { ReactComponent as CloseIcon } from './close.svg';
+import { ReactComponent as ChevronRight } from './chevron-right.svg';
 
 import './Filters.css';
 
@@ -172,22 +173,27 @@ export default function Filters() {
   });
 
   const [openFilters, setOpenFilters] = useState(false);
+  const togglePopup = (open: boolean) => {
+    if (open) {
+      document.body.classList.add('overlay-open');
+    } else {
+      document.body.classList.remove('overlay-open');
+    }
+    setOpenFilters(open);
+  };
 
   return (
     <>
-      <button
-        className="filter-button"
-        onClick={() => setOpenFilters(!openFilters)}
-      >
-        Open Filters
+      <button className="filter-button" onClick={() => togglePopup(true)}>
+        Filters <ChevronRight />
       </button>
       {openFilters && (
         <div className="overlay">
           <button
             className="close-overlay-button"
-            onClick={() => setOpenFilters(false)}
+            onClick={() => togglePopup(false)}
           >
-            <CloseIcon fill="#fff"></CloseIcon>
+            <CloseIcon />
           </button>
           <div className="filters">
             <h2>Filters</h2>

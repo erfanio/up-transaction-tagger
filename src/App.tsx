@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Accounts from './Accounts';
 import ActionBar from './ActionBar';
 import Filters from './Filters';
+import Search from './Search';
 
 import './App.css';
 
@@ -56,7 +57,10 @@ export default function App() {
     <div className="app">
       <WithApiKey>
         <React.Suspense fallback={<p>Loading accounts...</p>}>
-          <Filters />
+          <div className="topbar">
+            <Search />
+            <Filters />
+          </div>
           <Accounts />
           <ActionBar />
         </React.Suspense>

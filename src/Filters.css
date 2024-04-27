@@ -1,7 +1,16 @@
 .filter-button {
-  padding: 10px 20px;
-  background-color: #fdfdfd;
-  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  background-color: #2f2f39;
+  color: #fff;
+}
+
+.filter-button svg {
+  width: 1em;
+  height: 1em;
+  margin-top: 2px;
+  margin-left: 4px;
+  color: #ff7a64;
 }
 
 .overlay {
@@ -11,25 +20,32 @@
   left: 0;
   right: 0;
   z-index: 999;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   background: rgba(0, 0, 0, 0.8);
+  display: grid;
+  grid-template-columns: auto min(500px, 100%) auto;
+  grid-template-rows: 10% 90%;
+  grid-template-areas:
+    '. close-button .'
+    '. filters .';
 }
 
-.overlay .close-overlay-button {
+.close-overlay-button {
+  grid-area: close-button;
   align-self: end;
-  margin: 15px;
+  justify-self: end;
+  padding: 15px;
   background: none;
   border: none;
 }
 
-.overlay .close-overlay-button svg {
+.close-overlay-button svg {
   width: 20px;
   height: 20px;
+  color: #fff;
 }
 
 .filters {
+  grid-area: filters;
   background-color: #fdfdfd;
   overflow: auto;
   box-shadow:
@@ -39,7 +55,6 @@
     0 22.3px 17.9px rgba(0, 0, 0, 0.072),
     0 41.8px 33.4px rgba(0, 0, 0, 0.086),
     0 100px 80px rgba(0, 0, 0, 0.12);
-  flex-grow: 1;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 }

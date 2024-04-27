@@ -1,3 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;500&display=swap');
+
+* {
+  box-sizing: content-box;
+}
+
+body {
+  background-color: #24232e;
+  font-family: 'Cabin', sans-serif;
+}
+
+body.overlay-open {
+  overflow: hidden;
+}
+
+#root {
+  margin: 5px;
+}
+
+p {
+  margin: 0;
+}
+
 button {
   display: inline-block;
   border: none;
@@ -9,4 +32,7 @@ button {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+
+  padding: 10px 20px;
+  border-radius: 3px;
 }

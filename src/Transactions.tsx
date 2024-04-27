@@ -70,7 +70,7 @@ const Transaction = React.memo(
     const amountOptions = {
       style: 'currency',
       currency: 'AUD',
-      trailingZeroDisplay: "stripIfInteger",
+      trailingZeroDisplay: 'stripIfInteger',
     };
     const formattedAmount = new Intl.NumberFormat(
       'en-AU',

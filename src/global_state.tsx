@@ -1,10 +1,4 @@
-import {
-  atom,
-  selector,
-  selectorFamily,
-  useRecoilTransaction_UNSTABLE,
-  waitForAll,
-} from 'recoil';
+import { atom, selector, selectorFamily, waitForAll } from 'recoil';
 import {
   accountsQuery,
   categoriesQuery,
@@ -44,6 +38,11 @@ export const filtersState = atom<Filters>({
   }),
 });
 
+export const searchState = atom<string>({
+  key: 'search',
+  default: '',
+});
+
 export const filteredTransactionsQuery = selectorFamily<any, string>({
   key: 'filtered-transactions',
   get:
@@ -51,26 +50,29 @@ export const filteredTransactionsQuery = selectorFamily<any, string>({
     ({ get }) => {
       const transactions = get(paginatedTransactionsState(accountId));
       const { categories, coverAccounts } = get(filtersState);
+      const search = get(searchState);
 
-      const filtered = transactions.list
-        .filter((transaction) => {
-          const transactionCategory = transaction.relationships.category.data;
-          if (transactionCategory === null) {
-            return categories[UNCATEGORIZED_ID];
-          }
-          return categories[transactionCategory.id];
-        })
-        .filter((transaction) => {
-          if (!transaction.coverTransaction) {
-            return coverAccounts[NOT_COVERED_ID];
-          }
-          const coveredAccount =
-            transaction.coverTransaction.relationships.transferAccount.data;
-          if (!coveredAccount) {
-            return coverAccounts[NOT_COVERED_ID];
-          }
-          return coverAccounts[coveredAccount.id];
-        });
+      const filtered = transactions.list.filter((transaction) => {
+        const transactionCategory = transaction.relationships.category.data;
+        const categoryMatch =
+          (transactionCategory && categories[transactionCategory.id]) ||
+          categories[UNCATEGORIZED_ID];
+
+        const coveredAccount =
+          transaction.coverTransaction &&
+          transaction.coverTransaction.relationships.transferAccount.data;
+        const coverMatch =
+          (coveredAccount && coverAccounts[coveredAccount.id]) ||
+          coverAccounts[NOT_COVERED_ID];
+
+        const searchMatch =
+          (transaction.attributes.description &&
+            transaction.attributes.description.toLowerCase().indexOf(search.toLowerCase()) != -1) ||
+          (transaction.attributes.rawText &&
+            transaction.attributes.rawText.toLowerCase().indexOf(search.toLowerCase()) != -1);
+
+        return categoryMatch && coverMatch && searchMatch;
+      });
 
       return filtered;
     },

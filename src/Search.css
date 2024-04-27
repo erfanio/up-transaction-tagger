@@ -1,0 +1,30 @@
+.search {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: #2f2f39;
+  border-radius: 3px;
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.search:focus-within {
+  outline: 1px solid #ff7a64;
+}
+
+.search svg {
+  width: 1em;
+  height: 1em;
+  margin-right: 10px;
+  color: #ff7a64;
+}
+
+.search input {
+  border: none;
+  background: transparent;
+  color: #fff;
+}
+
+.search input:focus {
+  outline: none;
+}
