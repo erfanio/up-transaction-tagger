@@ -185,7 +185,7 @@ type Category = {
   id: string;
   relationships: any;
   attributes: { name: string };
-  childCategories: Array<Category>;
+  childCategories: Array<ChildCategory>;
 };
 const makeCategoryTree = (categories: Array<Category>): Array<Category> => {
   const tree = new Map<string, any>();

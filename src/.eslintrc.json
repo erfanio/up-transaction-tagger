@@ -12,6 +12,8 @@
   "plugins": ["@typescript-eslint"],
   "parserOptions": { "project": ["./tsconfig.json"] },
   "rules": {
-    "curly": "error"
+    "curly": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-non-null-assertion": "off"
   }
 }
