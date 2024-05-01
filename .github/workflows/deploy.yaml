@@ -8,6 +8,10 @@ on:
 
 jobs:
   build:
+    permissions:
+      pages: write
+      id-token: write
+
     runs-on: ubuntu-latest
 
     steps:
@@ -25,8 +29,8 @@ jobs:
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v2
+      with:
+        path: build
 
     - name: Deploy to GitHub Pages
       uses: actions/deploy-pages@v2
-      with:
-        path: build
