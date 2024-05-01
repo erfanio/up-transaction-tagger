@@ -1,7 +1,10 @@
 # Up Bank Transaction Tagger
 
 Web app using [Up Bank API](https://developer.up.com.au/) to allow bulk tagging of
+transactions. Everything happens in your browser, so a refresh will wipe any loaded
 transactions.
+
+Access the live version on GitHub Pages! [erfanio.github.io/up-transaction-tagger](https://erfanio.github.io/up-transaction-tagger/)
 
 ![screenshot](./preview.png)
 
