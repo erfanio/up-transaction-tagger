@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build": "react-scripts build",
-    "eslint": "eslint .",
+    "eslint": "eslint src",
     "eject": "react-scripts eject",
     "prettier": "prettier --write .",
     "start": "BROWSER=none PORT=3000 react-scripts start",

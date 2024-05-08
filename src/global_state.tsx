@@ -67,9 +67,13 @@ export const filteredTransactionsQuery = selectorFamily<any, string>({
 
         const searchMatch =
           (transaction.attributes.description &&
-            transaction.attributes.description.toLowerCase().indexOf(search.toLowerCase()) != -1) ||
+            transaction.attributes.description
+              .toLowerCase()
+              .indexOf(search.toLowerCase()) != -1) ||
           (transaction.attributes.rawText &&
-            transaction.attributes.rawText.toLowerCase().indexOf(search.toLowerCase()) != -1);
+            transaction.attributes.rawText
+              .toLowerCase()
+              .indexOf(search.toLowerCase()) != -1);
 
         return categoryMatch && coverMatch && searchMatch;
       });
