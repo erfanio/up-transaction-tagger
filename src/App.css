@@ -6,3 +6,11 @@
 .topbar {
   display: flex;
 }
+
+.card.text p {
+  margin: 1em 0 1em 0;
+}
+
+.error pre {
+  text-wrap: auto;
+}

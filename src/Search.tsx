@@ -1,9 +1,7 @@
 import { useRecoilState } from 'recoil';
-import { searchState } from './global_state';
+import { searchState } from './data/filters';
 import React from 'react';
-
-import { ReactComponent as SearchIcon } from './search.svg';
-
+import { ReactComponent as SearchIcon } from './svg/search.svg';
 import './Search.css';
 
 export default function Search() {

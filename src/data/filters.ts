@@ -1,9 +1,7 @@
-import { atom, selector, selectorFamily, waitForAll } from 'recoil';
-import {
-  accountsQuery,
-  categoriesQuery,
-  paginatedTransactionsState,
-} from './api_client';
+import { atom, selector, selectorFamily } from 'recoil';
+import { accountsQuery } from './accounts';
+import { categoriesQuery } from './categories';
+import { paginatedTransactionsState } from './transactions';
 
 export const UNCATEGORIZED_ID = 'uncategorized';
 export const NOT_COVERED_ID = 'none';
@@ -80,28 +78,4 @@ export const filteredTransactionsQuery = selectorFamily<any, string>({
 
       return filtered;
     },
-});
-
-export const selectedTransactionsState = atom<Set<string>>({
-  key: 'selected-transactions',
-  default: new Set(),
-});
-
-export const selectedTransactionsQuery = selector<Array<any>>({
-  key: 'selected-transactions-query',
-  get: async ({ get }) => {
-    const accounts = await get(accountsQuery);
-    const accountsTransactionLists = get(
-      waitForAll(
-        accounts.map((account) => filteredTransactionsQuery(account.id)),
-      ),
-    );
-    const transactions = [];
-    for (const accountTransactionList of accountsTransactionLists) {
-      transactions.push(...accountTransactionList);
-    }
-
-    const selectedTransactionIds = get(selectedTransactionsState);
-    return transactions.filter((t) => selectedTransactionIds.has(t.id));
-  },
 });

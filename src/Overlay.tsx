@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { ReactComponent as CloseIcon } from './close.svg';
-
+import { ReactComponent as CloseIcon } from './svg/close.svg';
 import './Overlay.css';
 
 type OverlayProps = {
@@ -10,7 +9,6 @@ type OverlayProps = {
 };
 export default function Overlay({ open, setOpen, children }: OverlayProps) {
   useEffect(() => {
-    console.log('effect happened!!');
     if (open) {
       document.body.classList.add('overlay-open');
     } else {

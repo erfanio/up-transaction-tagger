@@ -2,7 +2,6 @@ import * as ReactDOMClient from 'react-dom/client';
 import App from './App';
 import { RecoilRoot } from 'recoil';
 import { StrictMode } from 'react';
-
 import './index.css';
 import './vendor/normalize.css';
 

@@ -1,8 +1,7 @@
-import { accountsQuery } from './api_client';
+import { accountsQuery } from './data/accounts';
 import { useRecoilValue } from 'recoil';
 import React, { useState } from 'react';
 import Transactions from './Transactions';
-
 import './Accounts.css';
 
 const TRIANGLE_DOWN = '▾';

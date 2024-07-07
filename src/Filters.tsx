@@ -1,10 +1,10 @@
-import { accountsQuery, categoriesQuery } from './api_client';
-import { filtersState, NOT_COVERED_ID, UNCATEGORIZED_ID } from './global_state';
+import { accountsQuery } from './data/accounts';
+import { categoriesQuery } from './data/categories';
+import { filtersState, NOT_COVERED_ID, UNCATEGORIZED_ID } from './data/filters';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import React, { useState } from 'react';
-import { ReactComponent as ChevronRight } from './chevron-right.svg';
+import { ReactComponent as ChevronRight } from './svg/chevron-right.svg';
 import Overlay from './Overlay';
-
 import './Filters.css';
 
 const TRIANGLE_DOWN = '▾';

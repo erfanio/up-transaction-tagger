@@ -1,17 +1,14 @@
+import { accountNameQuery } from './data/accounts';
 import {
   loadMoreTransactions,
-  accountNameQuery,
   paginatedTransactionsState,
-  categoryLookupQuery,
-} from './api_client';
-import {
-  filteredTransactionsQuery,
-  selectedTransactionsState,
-} from './global_state';
+} from './data/transactions';
+import { categoryLookupQuery } from './data/categories';
+import { filteredTransactionsQuery } from './data/filters';
+import { selectedTransactionsState } from './data/selectedTransactions';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import React, { useState, useCallback, useMemo } from 'react';
 import classnames from 'classnames';
-
 import './Transactions.css';
 
 function Category({ category }: { category: any }) {

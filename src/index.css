@@ -21,7 +21,8 @@ p {
   margin: 0;
 }
 
-button {
+button,
+input[type='submit'] {
   display: inline-block;
   border: none;
   text-decoration: none;
@@ -34,5 +35,11 @@ button {
   -moz-appearance: none;
 
   padding: 10px 20px;
+  border-radius: 3px;
+}
+
+.card {
+  padding: 20px;
+  background: #fff;
   border-radius: 3px;
 }

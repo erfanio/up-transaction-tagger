@@ -1,0 +1,9 @@
+.api-form label > input {
+  margin-left: 10px;
+}
+
+.api-form input[type='submit'] {
+  margin-top: 20px;
+  display: block;
+  background-color: #ff7a64;
+}
