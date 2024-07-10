@@ -25,7 +25,7 @@ export default function Overlay({ open, setOpen, children }: OverlayProps) {
       <button className="close-overlay-button" onClick={() => setOpen(false)}>
         <CloseIcon />
       </button>
-      {children}
+      <div className="overlay-content">{children}</div>
     </div>
   );
 }

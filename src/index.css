@@ -9,12 +9,24 @@ body {
   font-family: 'Cabin', sans-serif;
 }
 
+/* We're importing Cabin 500 weight as the bold font */
+b,
+strong,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 500;
+}
+
 body.overlay-open {
   overflow: hidden;
 }
 
 #root {
-  margin: 5px;
+  margin: 10px;
 }
 
 p {

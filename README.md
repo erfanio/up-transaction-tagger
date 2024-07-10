@@ -1,4 +1,4 @@
-# Unofficial Up Bank Web App
+# Up Bank Transactions Web App (Unofficial)
 
 Web app using [Up Bank API](https://developer.up.com.au/), currently primarily to
 allow bulk tagging of transactions. Everything happens in your browser, so a
@@ -28,8 +28,8 @@ transactions under pretty UI but they're still there.
 
 These transactions show up in the API but they don't mark which transaction
 they're covering. I have an
-[open GitHub issue](https://github.com/up-banking/api/issues/99) with Up to add
-this feature.
+[open GitHub issue](https://github.com/up-banking/api/issues/99) with Up team to
+add this feature.
 
 For now, this web app uses heuristics to find likely covers/forwards and displays
 them a similar UI to the app.

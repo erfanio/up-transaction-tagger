@@ -24,20 +24,23 @@ export const get = async <T>({
     if (json && json.errors && json.errors.length > 0) {
       throw new FetchError(errorMessage, json.errors[0]);
     }
-    throw new FetchError(errorMessage, 'Unknown error! Failed to send requests to Up API.');
+    throw new FetchError(
+      errorMessage,
+      'Unknown error! Failed to send requests to Up API.',
+    );
   }
   const json: T = await resp.json();
   return json;
 };
 
 export class FetchError extends Error {
-  errorMessage = ''
-  errorDetails: any = ''
+  errorMessage = '';
+  errorDetails: any = '';
 
   constructor(errorMessage: string, errorDetails: any) {
     super(errorMessage);
 
-    this.name = "FetchError";
+    this.name = 'FetchError';
     this.errorMessage = errorMessage;
     this.errorDetails = errorDetails;
   }
