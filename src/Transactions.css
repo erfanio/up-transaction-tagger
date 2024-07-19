@@ -3,10 +3,6 @@
   flex-flow: column nowrap;
 }
 
-.transaction.disabled {
-  color: gray;
-}
-
 .transactions .date {
   padding: 9px 20px;
   background: #f4f4f3;
@@ -32,8 +28,14 @@
 .transaction {
   padding: 10px 20px;
   display: flex;
+  cursor: pointer;
   flex-flow: row nowrap;
   border-bottom: 1px #eaeaea solid;
+}
+
+.transaction.disabled {
+  color: gray;
+  cursor: initial;
 }
 
 .transaction:last-child {

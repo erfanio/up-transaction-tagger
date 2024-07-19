@@ -1,5 +1,8 @@
 .api-form label > input {
-  margin-left: 10px;
+  display: block;
+  margin-top: 0.5em;
+  width: 100%;
+  max-width: 300px;
 }
 
 .api-form input[type='submit'] {

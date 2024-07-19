@@ -36,7 +36,8 @@ const Transaction = React.memo(
     selected: boolean;
     onSelectChange: (
       transactionId: string,
-      event: React.ChangeEvent<HTMLInputElement>,
+      shiftPressed: boolean,
+      isChecked: boolean,
     ) => void;
   }) => {
     const {
@@ -74,16 +75,27 @@ const Transaction = React.memo(
       amountOptions,
     ).format(Math.abs(value));
 
+    const disabled = !isCategorizable;
+
+    const onSelect = (
+      event: React.MouseEvent | React.ChangeEvent<HTMLInputElement>,
+    ) => {
+      // Prevent shift click from highlighting text
+      window.getSelection()!.removeAllRanges();
+      onSelectChange(
+        transaction.id,
+        // For some reason the ChangeEvent doesn't have shiftKey in TS
+        (event.nativeEvent as any).shiftKey,
+        !selected,
+      );
+    };
+
     return (
       <div
-        className={classnames('transaction', { disabled: !isCategorizable })}
+        className={classnames('transaction', { disabled })}
+        onClick={!disabled ? onSelect : undefined}
       >
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={(event) => onSelectChange(transaction.id, event)}
-          disabled={!isCategorizable}
-        />
+        <input type="checkbox" checked={selected} disabled={disabled} />
         <div>
           <p className="time">{time}</p>
           <p>
@@ -170,11 +182,11 @@ export default function Transactions({ accountId }: { accountId: string }) {
   );
 
   const handleSelect = useCallback(
-    (transactionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    (transactionId: string, shiftPressed: boolean, isChecked: boolean) => {
       const pos = filteredTransactions.findIndex(
         (t: any) => t.id === transactionId,
       );
-      if ((event.nativeEvent as KeyboardEvent).shiftKey) {
+      if (shiftPressed) {
         const [first, last] =
           lastSelectPos < pos ? [lastSelectPos, pos] : [pos, lastSelectPos];
         const transactionIds = filteredTransactions
@@ -183,13 +195,13 @@ export default function Transactions({ accountId }: { accountId: string }) {
           .map((transaction: any) => transaction.id);
         selectedTransactionsDispatch({
           transactionIds,
-          selected: event.target.checked,
+          selected: isChecked,
         });
       } else {
         lastSelectPos = pos;
         selectedTransactionsDispatch({
           transactionIds: [transactionId],
-          selected: event.target.checked,
+          selected: isChecked,
         });
       }
     },
